@@ -1,0 +1,3 @@
+grammar cantor;
+
+program : EOF ;

@@ -1,0 +1,23 @@
+# ANTLR generated files (es generen amb `make`)
+cantorLexer.py
+cantorParser.py
+cantorListener.py
+cantorVisitor.py
+*.interp
+*.tokens
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Docs
+docs/seguiment/*
