@@ -11,16 +11,21 @@ class CantorVisitor(cantorVisitor):
 
     def __init__(self, file_path):
         self.base_dir = os.path.dirname(file_path)
+        self.extended = False
         self.imported = set()
         self.functions = {
             'k_1':  lambda x: 1,
             'id':   lambda x: x,
             'add':  lambda x: (lambda x1, y1: x1+y1)(*unpi(x)), 
             'mul':  lambda x: (lambda x1, y1: x1*y1)(*unpi(x)), 
-            'diff': lambda x: (lambda x1, y1: max(0,x1-y1))(*unpi(x)), 
+            'diff': lambda x: (lambda x1, y1: max(0,x1-y1))(*unpi(x)),
+            'fst':  lambda x: unpi(x)[0],
+            'snd':  lambda x: unpi(x)[1],
         }
 
     def visitProgram(self, ctx):
+        if ctx.extended_dir():
+            self.extended = True
         for import_dir in ctx.import_dir():
             self.visitImport_dir(import_dir)
         for definition in ctx.definition():
@@ -63,5 +68,14 @@ class CantorVisitor(cantorVisitor):
 
         if ctx.PAIR():
             return lambda x: pi(f(x), g(x))
+        elif ctx.COMPAIR():
+            if not self.extended:
+                print(f"Error: 'compair' requereix mode extended", file=sys.stderr)
+                return lambda x: 0
+            if ctx.ID(2) is None:
+                print(f"[USAGE] compair <func1> <func2> <func3>", file=sys.stderr)
+                return lambda x: 0
+            h = self.functions[ctx.ID(2).getText()]
+            return lambda x: f(pi(g(x), h(x)))
         else:
             return lambda x: f(g(x))

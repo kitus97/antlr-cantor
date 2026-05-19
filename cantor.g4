@@ -3,11 +3,15 @@ grammar cantor;
 // ── Parser ──────────────────────────────────────────────
 
 program
-    : main_dir import_dir* definition* EOF
+    : main_dir extended_dir? import_dir* definition* EOF
     ;
 
 main_dir
     : MAIN ID
+    ;
+
+extended_dir
+    : EXTENDED
     ;
 
 import_dir
@@ -25,15 +29,18 @@ doc
 body
     : PAIR ID ID
     | COMP ID ID
+    | COMPAIR ID ID ID
     ;
 
 // ── Lexer ────────────────────────────────────────────────
 
-MAIN   : 'main' ;
-IMPORT : 'import' ;
-DEFINE : 'define' ;
-PAIR   : 'pair' ;
-COMP   : 'comp' ;
+MAIN        : 'main' ;
+EXTENDED    : 'extended';
+IMPORT      : 'import' ;
+DEFINE      : 'define' ;
+PAIR        : 'pair' ;
+COMP        : 'comp' ;
+COMPAIR     : 'compair' ;
 
 ID     : [a-zA-Z_][a-zA-Z0-9_]* ;
 DOC    : '[' ~[\]]* ']' ;

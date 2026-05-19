@@ -15,6 +15,9 @@
 - [ADR-008 — Resolució d'imports relativa al fitxer actual](#adr-008)
 - [ADR-009 — `set` per evitar imports duplicats](#adr-009)
 - [ADR-010 — Gestió de definicions duplicades amb warning](#adr-010)
+- [ADR-011 — `extended` com a flag booleà al visitador](#adr-011)
+- [ADR-012 — `compair` com a alternativa al `body` de la gramàtica](#adr-012)
+- [ADR-013 — `fst` i `snd` com a primitives](#adr-013)
 
 ---
 
@@ -293,3 +296,89 @@ def visitDefinition(self, ctx):
 - **Error fatal** — massa estricte, contradiu el requisit de "no petar mai"
 - **Sobreescriure silenciosament** — pot causar bugs difícils de detectar sense cap avís
 - **Set separat** — innecessari, `self.functions` ja conté tota la informació needed
+
+---
+
+## ADR-011 — `extended` com a flag booleà al visitador {#adr-011}
+
+**Fase:** 3
+**Estat:** ✅ Acceptada
+
+### Context
+Cal controlar si el mode extended està actiu per permetre o no l'ús de `compair` i `primrec`.
+
+### Decisió
+Un simple booleà `self.extended` inicialitzat a `False` al constructor i activat a `visitProgram` si existeix `extended_dir`:
+
+```python
+self.extended = False
+
+def visitProgram(self, ctx):
+    if ctx.extended_dir():
+        self.extended = True
+```
+
+### Motiu
+- **Simplicitat:** un booleà és suficient per controlar el mode
+- **Centralitzat:** tota la lògica de comprovació queda al `visitBody`
+
+### Alternatives descartades
+- Passar el flag com a paràmetre a cada mètode — innecessàriament verbose
+
+---
+
+## ADR-012 — `compair` com a alternativa al `body` de la gramàtica {#adr-012}
+
+**Fase:** 3
+**Estat:** ✅ Acceptada
+
+### Context
+`compair f g h` és una nova construcció que accepta tres arguments en lloc de dos.
+
+### Decisió
+Afegir `COMPAIR ID ID ID` com a alternativa a la regla `body`:
+
+```antlr
+body : PAIR ID ID
+     | COMP ID ID
+     | COMPAIR ID ID ID
+     ;
+```
+
+I comprovar `self.extended` a `visitBody` abans d'executar-la.
+
+### Motiu
+- **Consistent** amb el patró existent de `pair` i `comp`
+- La comprovació del flag `extended` es fa en temps de visita, no de parsing
+
+### Alternatives descartades
+- Regla gramatical separada per a `compair` — innecessari, és conceptualment un tipus de `body`
+
+---
+
+## ADR-013 — `fst` i `snd` com a primitives {#adr-013}
+
+**Fase:** 3
+**Estat:** ✅ Acceptada
+
+### Context
+Cal afegir `fst` i `snd` per poder extreure elements d'una parella codificada.
+
+### Decisió
+S'afegeixen directament a `self.functions` al constructor, seguint el mateix patró que `add` i `diff`:
+
+```python
+'fst': lambda z: unpi(z)[0],
+'snd': lambda z: unpi(z)[1],
+```
+
+### Motiu
+- **Consistència** amb la resta de primitives
+- No requereixen cap canvi a la gramàtica
+
+### Alternatives descartades
+- Afegir-les com a paraules clau de la gramàtica — innecessari, són funcions com qualsevol altra
+
+---
+
+*Última actualització: Fase 3 completada*

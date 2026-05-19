@@ -1,0 +1,19 @@
+# add3.cantor
+main add3
+extended
+
+define third
+    [3er element d'una seqüència de 3 elements]
+    comp snd snd
+
+define second
+    [2on element d'una seqüència de 3 elements]
+    comp fst snd
+
+define add23
+    [2on + 3er]
+    compair add second third
+
+define add3
+    [Suma de seqüència de tres elements]
+    compair add fst add23
