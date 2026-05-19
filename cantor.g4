@@ -3,11 +3,15 @@ grammar cantor;
 // ── Parser ──────────────────────────────────────────────
 
 program
-    : main_dir definition* EOF
+    : main_dir import_dir* definition* EOF
     ;
 
 main_dir
     : MAIN ID
+    ;
+
+import_dir
+    : IMPORT ID
     ;
 
 definition
@@ -26,6 +30,7 @@ body
 // ── Lexer ────────────────────────────────────────────────
 
 MAIN   : 'main' ;
+IMPORT : 'import' ;
 DEFINE : 'define' ;
 PAIR   : 'pair' ;
 COMP   : 'comp' ;

@@ -1,11 +1,17 @@
+import os
+import sys
+from antlr4 import CommonTokenStream, FileStream
+from cantorLexer import cantorLexer
+from cantorParser import cantorParser
 from cantorVisitor import cantorVisitor
 from cantor_math import pi, unpi
 
 
 class CantorVisitor(cantorVisitor):
 
-    def __init__(self):
-        # Taula de símbols: nom -> funció Python
+    def __init__(self, file_path):
+        self.base_dir = os.path.dirname(file_path)
+        self.imported = set()
         self.functions = {
             'k_1':  lambda x: 1,
             'id':   lambda x: x,
@@ -15,15 +21,39 @@ class CantorVisitor(cantorVisitor):
         }
 
     def visitProgram(self, ctx):
+        for import_dir in ctx.import_dir():
+            self.visitImport_dir(import_dir)
         for definition in ctx.definition():
             self.visitDefinition(definition)
         return self.visitMain_dir(ctx.main_dir())
 
     def visitMain_dir(self, ctx):
         return self.functions[ctx.ID().getText()]
+    
+    def visitImport_dir(self, ctx):
+        name = ctx.ID().getText() + '.cantor'
+        filepath = os.path.join(self.base_dir, name)
+
+        if filepath in self.imported:
+            return
+        self.imported.add(filepath)
+
+        # Processem el fitxer d'importació
+        input_stream = FileStream(filepath, encoding='utf-8')
+        lexer = cantorLexer(input_stream)
+        stream = CommonTokenStream(lexer)
+        parser = cantorParser(stream)
+        tree = parser.program()
+
+        for import_dir in tree.import_dir():
+            self.visitImport_dir(import_dir)
+        for definition in tree.definition():
+            self.visitDefinition(definition)
 
     def visitDefinition(self, ctx):
         name = ctx.ID().getText()
+        if name in self.functions:
+            print(f"Warning: la funció '{name}' ja està definida", file=sys.stderr)
         func = self.visitBody(ctx.body())
         self.functions[name] = func
 

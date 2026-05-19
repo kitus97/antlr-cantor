@@ -1,0 +1,20 @@
+# booleans.cantor
+main not
+
+import signe
+
+define aparella_1_amb_x
+    [Parella <1.x>]
+    pair k_1 id
+
+define not
+    [Not booleà: 0->1, 1->0]
+    comp diff aparella_1_amb_x
+
+define and
+    [And booleà: <1.1>->1, resta 0]
+    comp signe mul
+
+define or
+    [Or booleà: <0,0>->0, resta 1]
+    comp signe add

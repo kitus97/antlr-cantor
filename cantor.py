@@ -17,7 +17,7 @@ def main():
     parser = cantorParser(stream)
     tree = parser.program()
 
-    visitor = CantorVisitor()
+    visitor = CantorVisitor(sys.argv[1])
     main_func = visitor.visitProgram(tree)
 
     data = sys.stdin.read().split()
