@@ -1,3 +1,4 @@
+import itertools
 import os
 import sys
 from antlr4 import CommonTokenStream, FileStream
@@ -63,8 +64,10 @@ class CantorVisitor(cantorVisitor):
         self.functions[name] = func
 
     def visitBody(self, ctx):
-        f = self.functions[ctx.ID(0).getText()]
-        g = self.functions[ctx.ID(1).getText()]
+        if ctx.ID(0):
+            f = self.functions[ctx.ID(0).getText()]
+        if ctx.ID(1):
+            g = self.functions[ctx.ID(1).getText()]
 
         if ctx.PAIR():
             return lambda x: pi(f(x), g(x))
@@ -77,5 +80,12 @@ class CantorVisitor(cantorVisitor):
                 return lambda x: 0
             h = self.functions[ctx.ID(2).getText()]
             return lambda x: f(pi(g(x), h(x)))
+        elif ctx.MU():
+            if not self.extended:
+                print(f"Error: 'mu' requereix mode extended", file=sys.stderr)
+                return lambda x: 0
+            mu = lambda x: next((k for k in itertools.count() if f(pi(x,k)) != 0), -1) 
+            return mu
         else:
             return lambda x: f(g(x))
+        

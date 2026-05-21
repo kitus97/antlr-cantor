@@ -1,0 +1,16 @@
+# mod.cantor
+main mod
+extended
+import div
+
+define quocient
+    [x div y donada <x.y>]
+    comp div id
+
+define y_per_quocient
+    [y * (x div y)]
+    compair mul snd quocient
+
+define mod
+    [x mod y = x - y*(x div y)]
+    compair diff fst y_per_quocient

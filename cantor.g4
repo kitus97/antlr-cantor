@@ -30,6 +30,7 @@ body
     : PAIR ID ID
     | COMP ID ID
     | COMPAIR ID ID ID
+    | MU ID
     ;
 
 // ── Lexer ────────────────────────────────────────────────
@@ -41,6 +42,7 @@ DEFINE      : 'define' ;
 PAIR        : 'pair' ;
 COMP        : 'comp' ;
 COMPAIR     : 'compair' ;
+MU          : 'mu' ;
 
 ID     : [a-zA-Z_][a-zA-Z0-9_]* ;
 DOC    : '[' ~[\]]* ']' ;

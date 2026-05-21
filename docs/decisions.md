@@ -381,4 +381,34 @@ S'afegeixen directament a `self.functions` al constructor, seguint el mateix pat
 
 ---
 
-*Última actualització: Fase 3 completada*
+## ADR-014 — Implementació de `mu` amb `itertools.count` {#adr-014}
+
+**Fase:** 4
+**Estat:** ✅ Acceptada
+
+### Context
+L'operador `mu f` fa una cerca lineal sobre `k = 0, 1, 2, ...` fins trobar un `k` que satisfà el predicat `f`. Cal decidir com implementar aquesta cerca potencialment infinita.
+
+### Decisió
+Usar `itertools.count()` per generar una seqüència infinita:
+
+```python
+from itertools import count
+
+return lambda x: next(
+    (k for k in count() if f(pi(x, k)) != 0),
+    0
+)
+```
+
+### Motiu
+- **Correctesa teòrica:** `count()` no imposa cap límit artificial, consistent amb la semàntica de μ
+- **No peta:** si el predicat mai es satisfà, el programa es queda en bucle infinit — tècnicament no és un crash, i l'enunciat diu "efecte indefinit" per errors semàntics
+- **Simplicitat:** una sola línia, sense constants hardcodejades al codi
+
+### Alternatives descartades
+- **`range(N)` amb límit fix** — introdueix una constant arbitrària i pot fallar en casos legítims que requereixin moltes iteracions
+
+---
+
+*Última actualització: Fase 4 completada*
