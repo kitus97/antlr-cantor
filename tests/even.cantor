@@ -1,0 +1,21 @@
+# even.cantor
+main even
+extended
+import mod
+import booleans
+
+define k_2
+    [Constant 2]
+    compair add k_1 k_1
+
+define x_amb_2
+    [<x.2>]
+    pair id k_2
+
+define mod2
+    [x mod 2]
+    comp mod x_amb_2
+
+define even
+    [x és parell?]
+    comp not mod2

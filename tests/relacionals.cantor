@@ -1,0 +1,37 @@
+# relacionals.cantor
+main lt
+extended
+
+import booleans
+
+define swap
+    [Intercanvia <a.b> -> <b.a>]
+    pair snd fst
+
+define signe_diff
+    [signe(diff(a,b))]
+    comp signe diff
+
+define signe_diff_inv
+    [signe(diff(b,a))]
+    comp signe_diff swap
+
+define neq
+    [a != b]
+    compair or signe_diff signe_diff_inv
+
+define not_signe_diff
+    [not(signe(diff(a,b)))]
+    comp not signe_diff
+
+define lt
+    [a < b]
+    compair and not_signe_diff neq
+
+define gt
+    [a > b]
+    comp lt swap
+
+define eq
+    [a == b]
+    comp not neq

@@ -1,0 +1,10 @@
+# anterior.cantor
+main anterior
+
+define aparella_amb_1
+    [Aparella l'entrada x amb 1]
+    pair id k_1
+
+define anterior
+    [Anterior amb limit 0]
+    comp diff aparella_amb_1

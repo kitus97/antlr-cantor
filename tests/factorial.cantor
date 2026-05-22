@@ -1,0 +1,25 @@
+# factorial.cantor
+
+main factorial
+extended
+import relacionals
+
+define k_0
+    [0]
+    compair diff k_1 k_1
+
+define segon
+    [2on]
+    comp fst snd
+
+define is_base
+    [zero?]
+    compair eq id k_0
+
+define step
+    [recursiu fact]
+    compair mul fst segon
+
+define factorial
+    [x!]
+    primrec is_base k_1 step

@@ -1,0 +1,19 @@
+# maxmin.cantor
+main max
+extended
+
+define pair_b_diff
+    [<b, a-b> donada <a.b>]
+    pair snd diff
+
+define max
+    [max(a, b) = b + (a-b)]
+    comp add pair_b_diff
+
+define pair_a_diff
+    [<a, a-b> donada <a.b>]
+    pair fst diff
+
+define min
+    [min(a, b) = a - (a-b)]
+    comp diff pair_a_diff

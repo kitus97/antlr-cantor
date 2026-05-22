@@ -1,0 +1,25 @@
+# cond.cantor
+main max2
+extended
+import signe
+import relacionals
+
+define sp
+    [1 si x>y, 0 altrament]
+    comp signe gt
+
+define not_sp
+    [1 - sp]
+    comp not sp
+
+define cas_1
+    [fst * sp: x si x>y, 0 altrament]
+    compair mul fst sp
+
+define cas_2
+    [snd * not sp: y si x<=y, 0 altrament]
+    compair mul snd not_sp
+
+define max2
+    [max de x i y usant cond]
+    compair add cas_1 cas_2
