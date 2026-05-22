@@ -1,16 +1,14 @@
-from math import floor, sqrt
+from math import isqrt
 
 
 def pi(x: int, y: int) -> int:
     return (x + y) * (x + y + 1) // 2 + y
 
 def unpi(z: int) -> tuple[int, int]:
-    w = floor((sqrt(8 * z + 1) - 1) / 2)
+    w = (isqrt(8 * z + 1) - 1) // 2
     t = (w**2 + w) // 2
-
     y = z - t
     x = w - y
-
     return x, y
 
 def encode_list(lst: list[int]) -> int:

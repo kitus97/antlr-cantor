@@ -411,4 +411,77 @@ return lambda x: next(
 
 ---
 
+## ADR-015 — `primrec` retorna `fst` de la tupla acumulada {#adr-015}
+
+**Fase:** 5
+**Estat:** ✅ Acceptada
+
+### Context
+`primrec f g h` construeix internament una funció `s` que acumula els resultats en una tupla codificada `pi(s(x), s(x-1))`. Cal decidir si extreure el valor final `s(x)` al visitor o delegar-ho al script `.cantor`.
+
+### Decisió
+`make_primrec` retorna directament `fst` de la tupla, transparentment per a l'usuari:
+
+```python
+return lambda x: unpi(s(x))[0]
+```
+
+On `s(x)` té sempre la forma `pi(resultat_actual, acumulat_anterior)`.
+
+### Motiu
+- **Transparència:** l'usuari de `primrec` obté directament el valor `s(x)`, sense haver de fer `comp fst` al `.cantor`
+- **Consistència:** `primrec` es comporta com qualsevol altra funció — retorna un natural, no una tupla codificada
+- **Simplicitat:** evita haver de definir funcions auxiliars als scripts
+
+### Alternatives descartades
+- Retornar `s(x)` sencer i forçar l'usuari a fer `comp fst primrec_aux` al `.cantor` — més verbose i confús per a l'usuari
+
+---
+
+## ADR-016 — `is_base` de `primrec` comprova només `x = 0` {#adr-016}
+
+**Fase:** 5
+**Estat:** ✅ Acceptada
+
+### Context
+Per a Fibonacci, el cas base natural és `fib(0) = 1` i `fib(1) = 1`. La primera implementació tenia `is_base` comprovant tant `x=0` com `x=1`. Això causava que `s(1)` fos cas base i no contingués `s(0)` dins seu, fent que `x_2` fos sempre `0` per `fib(2)`.
+
+### Decisió
+`is_base` comprova **només `x = 0`**. `fib(1)` es calcula via `step` i obté correctament `fib(0) + fib(-1) = 1 + 0 = 1`.
+
+### Motiu
+- **Correctesa:** `s(1)` necessita contenir `s(0)` dins seu per poder accedir a `x_2` correctament
+- `fib(-1)` no existeix però `diff` el tracta com `0`, cosa que dona el resultat correcte per `fib(1) = 1`
+
+### Alternatives descartades
+- `is_base` amb `x=0` i `x=1` — causa que `x_2` sigui sempre `0` per valors propers al cas base
+
+---
+
+## ADR-017 — `isqrt` en lloc de `floor(sqrt(...))` a `unpi` {#adr-017}
+
+**Fase:** 5
+**Estat:** ✅ Acceptada
+
+### Context
+`unpi` usava `math.floor(math.sqrt(8 * z + 1))` per calcular `w`. Amb tuples codificades grans (com les que genera `primrec` per Fibonacci), `sqrt` perd precisió per limitacions del float i dona `math domain error`.
+
+### Decisió
+Substituir per `math.isqrt` que opera enterament amb enters:
+
+```python
+w = (isqrt(8 * z + 1) - 1) // 2
+```
+
+### Motiu
+- **Correctesa:** `isqrt` és exacte per qualsevol enter, sense límit de precisió
+- **Robustesa:** elimina errors de domini per números grans
+- **Simplicitat:** una sola funció en lloc de `floor(sqrt(...))`
+
+### Alternatives descartades
+- `floor(sqrt(...))` — perd precisió per enters grans, causa `math domain error`
+- `decimal.Decimal` amb alta precisió — funciona però és més complex i lent
+
+---
+
 *Última actualització: Fase 4 completada*

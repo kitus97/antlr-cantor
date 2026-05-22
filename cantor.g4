@@ -31,6 +31,7 @@ body
     | COMP ID ID
     | COMPAIR ID ID ID
     | MU ID
+    | PRIMREC ID ID ID
     ;
 
 // ── Lexer ────────────────────────────────────────────────
@@ -43,6 +44,7 @@ PAIR        : 'pair' ;
 COMP        : 'comp' ;
 COMPAIR     : 'compair' ;
 MU          : 'mu' ;
+PRIMREC     : 'primrec' ;
 
 ID     : [a-zA-Z_][a-zA-Z0-9_]* ;
 DOC    : '[' ~[\]]* ']' ;

@@ -1,0 +1,42 @@
+# fibonacci.cantor
+
+main fibonacci
+extended
+import relacionals
+import booleans
+
+define k_0
+    [0]
+    compair diff k_1 k_1
+
+define x_1
+    [correspon a x-1]
+    comp fst snd
+
+define x_2_aux
+    [auxiliar per treure s(x-2)]
+    comp snd snd
+
+define x_2
+    [correspon a x-2]
+    comp fst x_2_aux
+
+define eq_0
+    [zero?]
+    compair eq id k_0
+
+define eq_1
+    [un?]
+    compair eq id k_1
+
+define is_base
+    [zero || un]
+    compair eq id k_0
+
+define step
+    [recursiu fib]
+    compair add x_1 x_2
+
+define fibonacci
+    [fib(x)]
+    primrec is_base k_1 step
