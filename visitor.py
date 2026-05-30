@@ -50,6 +50,8 @@ class CantorVisitor(cantorVisitor):
         parser = cantorParser(stream)
         tree = parser.program()
 
+        if tree.extended_dir():
+            self.extended = True
         for import_dir in tree.import_dir():
             self.visitImport_dir(import_dir)
         for definition in tree.definition():
@@ -72,31 +74,22 @@ class CantorVisitor(cantorVisitor):
             return lambda x: pi(f(x), g(x))
         elif ctx.COMPAIR():
             if not self.extended:
-                print("Error: 'compair' requereix mode extended",
-                      file=sys.stderr)
-                return lambda x: 0
+                raise RuntimeError("'compair' requereix mode extended")
             if ctx.ID(2) is None:
-                print("[USAGE] compair <func1> <func2> <func3>",
-                      file=sys.stderr)
-                return lambda x: 0
+                raise RuntimeError("compair requereix tres funcions: compair <f> <g> <h>")
             h = self.functions[ctx.ID(2).getText()]
             return lambda x: f(pi(g(x), h(x)))
         elif ctx.MU():
             if not self.extended:
-                print("Error: 'mu' requereix mode extended", file=sys.stderr)
-                return lambda x: 0
+                raise RuntimeError("'mu' requereix mode extended")
             return lambda x: next(
                 (k for k in itertools.count() if f(pi(x, k)) != 0), -1
             )
         elif ctx.PRIMREC():
             if not self.extended:
-                print("Error: 'primrec' requereix mode extended",
-                      file=sys.stderr)
-                return lambda x: 0
+                raise RuntimeError("'primrec' requereix mode extended")
             if ctx.ID(2) is None:
-                print("[USAGE] primrec <func1> <func2> <func3>",
-                      file=sys.stderr)
-                return lambda x: 0
+                raise RuntimeError("primrec requereix tres funcions: primrec <f> <g> <h>")
             h = self.functions[ctx.ID(2).getText()]
             return self._make_primrec(f, g, h)
         else:

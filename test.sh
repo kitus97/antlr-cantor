@@ -4,7 +4,7 @@ PASS=0
 FAIL=0
 SKIP=0
 
-for cantor in tests/*.cantor; do
+for cantor in tests_vaquero/*.cantor; do
     base="${cantor%.cantor}"
     name=$(basename "$base")
 

@@ -11,7 +11,15 @@ Cal tenir instal·lats:
 - Python 3.12+
 - Java OpenJDK 11+ (per generar el parser via ANTLR)
 
-El jar d'ANTLR 4.13.2 ja s'inclou al projecte. Només cal instal·lar el runtime Python:
+Cal descarregar el jar d'ANTLR 4.13.2 i col·locar-lo a l'arrel del projecte:
+
+```bash
+curl -O https://www.antlr.org/download/antlr-4.13.2-complete.jar
+```
+
+O bé descarregar-lo manualment des de https://www.antlr.org/download.html i deixar-lo com `antlr-4.13.2-complete.jar` a l'arrel del projecte.
+
+A continuació, instal·lar el runtime Python:
 
 ```bash
 pip install antlr4-python3-runtime==4.13.2
@@ -50,7 +58,7 @@ echo "5 3" | python3 cantor.py tests/cond.cantor        # → 5
 
 El projecte es divideix en tres fitxers Python amb responsabilitats ben separades:
 
-- `cantor_math.py` — Matemàtica pura: `pi`, `unpi` i `encode_list`. Sense cap dependència de l'ANTLR.
+- `cantor_math.py` — Matemàtica: `pi`, `unpi` i `encode_list`. Sense cap dependència de l'ANTLR.
 - `visitor.py` — Visitador de l'AST: construeix les funcions Python a partir de les definicions del programa.
 - `cantor.py` — Punt d'entrada: orquestra el flux complet (parsejar, visitar, llegir stdin, imprimir).
 
@@ -71,10 +79,10 @@ La directiva `main` indica quina funció s'executa. La directiva `extended` és 
 
 | Constructor | Sintaxi | Semàntica |
 |-------------|---------|-----------|
-| `pair`    | `pair f g`       | `x ↦ π(f(x), g(x))` |
-| `comp`    | `comp f g`       | `x ↦ f(g(x))` |
-| `compair` | `compair f g h`  | `x ↦ f(π(g(x), h(x)))` *(extended)* |
-| `mu`      | `mu f`           | `x ↦ min{k : f(π(x,k)) ≠ 0}` *(extended)* |
+| `pair`    | `pair f g`       | `x -> π(f(x), g(x))` |
+| `comp`    | `comp f g`       | `x -> f(g(x))` |
+| `compair` | `compair f g h`  | `x -> f(π(g(x), h(x)))` *(extended)* |
+| `mu`      | `mu f`           | `x -> min{k : f(π(x,k)) != 0}` *(extended)* |
 | `primrec` | `primrec f g h`  | Recursió primitiva sobre `x` *(extended)* |
 
 La documentació de cada funció s'escriu entre claudàtors (`[text lliure]`) i és ignorada per l'intèrpret.
@@ -119,7 +127,7 @@ Tant el lexer com el parser usen un `SyntaxErrorListener` personalitzat per repo
 
 ## Gestió d'errors
 
-L'enunciat estableix que no es donaran errors semàntics, de tipus o d'execució, però el programa no ha de petar en cap cas.
+L'enunciat diu que no es donaran errors semàntics, de tipus o d'execució, però el programa no ha de petar en cap cas.
 
 - **Errors sintàctics** — Reportats per stderr amb línia i columna i finalitzen amb codi de sortida 1:
   ```
@@ -135,12 +143,6 @@ L'enunciat estableix que no es donaran errors semàntics, de tipus o d'execució
 
 Els jocs de proves es troben a `tests/`. Cada script `.cantor` té un fitxer `.inp` amb l'entrada i un `.out` amb la sortida esperada.
 
-Per executar tots els tests automàticament:
-
-```bash
-bash test.sh
-```
-
 Per comparar manualment la sortida d'un test:
 
 ```bash
@@ -149,7 +151,7 @@ python3 cantor.py tests/factorial.cantor < tests/factorial.inp | diff - tests/fa
 
 Scripts disponibles:
 
-| Fitxer | `main` | Descripció |
+| Fitxer | main | Descripció |
 |--------|--------|-----------|
 | `suma.cantor` | `add` | Suma de dos naturals |
 | `anterior.cantor` | `anterior` | Predecessor amb límit 0 |
@@ -169,7 +171,7 @@ Els fitxers `test_*.cantor` proporcionen casos addicionals: casos límit a zero,
 
 ## Decisions de disseny
 
-**Tres mòduls amb responsabilitats separades** — `cantor_math.py` conté la matemàtica pura independent de l'ANTLR; `visitor.py` construeix les funcions Python a partir de l'AST; `cantor.py` orquestra el flux complet. Cada mòdul es pot llegir i testar de forma independent (principi SRP).
+**Tres mòduls amb responsabilitats separades** — `cantor_math.py` conté la matemàtica independent de l'ANTLR; `visitor.py` construeix les funcions Python a partir de l'AST; `cantor.py` orquestra el flux complet. Cada mòdul es pot llegir i testar de forma independent.
 
 **Funcions com a callables Python** — Cada funció cantoriana es representa com un `Callable[[int], int]` emmagatzemat per nom a `self.functions`. `comp f g` es tradueix literalment a `lambda x: f(g(x))`, sense cap AST intermedi ni estructura addicional. Les funcions es construeixen una sola vegada en temps de visita.
 
@@ -182,6 +184,8 @@ Els fitxers `test_*.cantor` proporcionen casos addicionals: casos límit a zero,
 **Imports relatius al fitxer actual** — Quan `foo.cantor` fa `import bar`, es busca `bar.cantor` al mateix directori que `foo.cantor` (via `os.path.dirname`), independentment d'on s'executi el programa. Imports duplicats s'ignoren amb un `set` de paths absoluts ja processats.
 
 **`extended` activat abans dels imports** — A `visitProgram`, el flag `self.extended` s'activa abans de processar cap import. Això garanteix que les definicions dels fitxers importats que usen `compair`, `mu` o `primrec` es construeixin correctament.
+
+**`extended` recursiu** - Quan analitzem els imports a `visitImport_dir`, abans de importar recursivament o mirar les definicions, mirem si aquest programa fa servir el flag `extended`. En cas que sí, fiquem `self.extended` a True. Això ens fa no depnedre de saber si altres imports faràn servir, o no, el mode `extended`.
 
 **`mu` amb `itertools.count()`** — La cerca lineal no imposa cap límit artificial. Si el predicat mai es satisfà, el programa entra en bucle infinit, que és l'efecte indefinit establert per l'enunciat per a errors semàntics.
 
